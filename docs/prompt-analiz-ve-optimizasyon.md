@@ -197,3 +197,85 @@ Copilot agent'ın proje kurallarını öğrenmesini sağlayan talimat dosyasın�
 | **Tek Sorumluluk** | Her prompt tek bir katmanı veya tek bir görevi hedeflemeli |
 | **Bağımsızlık** | Prompt'lar birbirinden bağımsız çalışabilmeli, önceki bağlama güvenmemeli |
 | **Parametriklik** | Entity isimleri değişken tutularak prompt'lar tekrar kullanılabilir hale getirilmeli |
+| **Test Prompt'ları** | Hedef sınıflar, test framework bilgisi ve Spring Boot versiyon uyarıları belirtilmeli |
+| **Spring Boot 4 Farkları** | Import path'leri ve otomatik konfigürasyon farklarını prompt'ta belirtmek zaman kazandırır |
+| **Coverage Hedefi** | Test prompt'larında coverage hedefini belirtmek (%100 gibi) agent'ın daha kapsamlı test yazmasını sağlar |
+
+---
+
+## Prompt 11 — Business Katmanı Unit Test Yazımı
+
+### Orijinal Prompt:
+> Product ve kategori için business unit testleri yaz. Code coverage önemli. coverage raporu da üret.
+
+### Optimize Edilmiş Prompt:
+> Product ve Category için business katmanı unit testlerini yaz. Code coverage önemli. JaCoCo coverage raporu üret.
+>
+> **Test edilecek sınıflar:**
+> 1. `business/rules/CategoryBusinessRules` → Tüm iş kuralı metotları (pozitif + negatif senaryolar)
+> 2. `business/rules/ProductBusinessRules` → Tüm iş kuralı metotları (pozitif + negatif senaryolar)
+> 3. `business/concretes/CategoryServiceImpl` → Tüm CRUD metotları
+> 4. `business/concretes/ProductServiceImpl` → Tüm CRUD metotları
+>
+> **Test kuralları:**
+> - JUnit Jupiter + Mockito kullan
+> - @ExtendWith(MockitoExtension.class) ile test sınıflarını yapılandır
+> - Coverage %100 hedefle
+> - pom.xml'e JaCoCo plugin ekle
+
+### Açıklama:
+Business katmanının kapsamlı testlerini oluşturur. **Revize sebebi:** Orijinal prompt hangi sınıfların test edileceğini, hangi test framework'ünün kullanılacağını ve coverage aracını belirtmemiş. Optimize versiyonda test edilecek sınıflar, kullanılacak framework ve coverage konfigürasyonu açıkça listelendi. Ayrıca "pozitif + negatif senaryolar" belirtilerek her iş kuralının hem başarılı hem hatalı durumlarının test edilmesi sağlandı.
+
+**Sonuç:** 44 test yazıldı (6 + 10 + 11 + 17), tümü geçti. JaCoCo raporu: business.rules %100, business.concretes %100.
+
+---
+
+## Prompt 12 — API (Controller) Katmanı Unit Test Yazımı
+
+### Orijinal Prompt:
+> api için unit testleri yaz
+
+### Optimize Edilmiş Prompt:
+> Product ve Category için API controller unit testlerini yaz.
+>
+> **Test edilecek sınıflar:**
+> - `api/controllers/CategoriesController` → Tüm endpoint'ler
+> - `api/controllers/ProductsController` → Tüm endpoint'ler
+>
+> **Test kuralları:**
+> - @WebMvcTest ile test sınıfını yapılandır
+> - MockMvc ile HTTP istekleri simüle et
+> - Service bağımlılığını @MockitoBean ile mockla
+> - Her endpoint için: başarılı senaryo + validasyon hatası + iş kuralı hatası
+> - HTTP status kodlarını doğrula (200, 201, 400)
+>
+> **Spring Boot 4 notları:**
+> - @WebMvcTest import: org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+> - @MockitoBean import: org.springframework.test.context.bean.override.mockito.MockitoBean
+> - ObjectMapper manuel oluşturulmalı
+
+### Açıklama:
+API katmanının controller testlerini oluşturur. **Revize sebebi:** Orijinal prompt sadece "api için unit testleri yaz" demiş. Hangi test yönteminin (MockMvc, RestTemplate, WebTestClient vb.) kullanılacağı, hangi senaryoların test edileceği belirsiz. Spring Boot 4'te `@WebMvcTest` ve `@MockitoBean` import path'leri değiştiği için bu bilgilerin prompt'ta verilmesi birçok deneme-yanılma döngüsünü önler. `ObjectMapper`'ın otomatik konfigüre edilmemesi de Spring Boot 4'e özgü bir sorun — prompt'ta belirtilmesi gerekir.
+
+**Sonuç:** 29 test yazıldı (14 + 15), tümü geçti. Validasyon, iş kuralı hatası ve başarılı senaryolar kapsandı.
+
+**Karşılaşılan Sorunlar:**
+1. Spring Boot 4'te `@WebMvcTest` paketi değişmiş → Import düzeltmesi gerekti
+2. `ObjectMapper` auto-configure edilmiyor → Manuel oluşturma gerekti
+3. Türkçe karakter encoding sorunu → MockMvc response body'de Turkish karakterler bozuldu, `.isNotEmpty()` ile çözüldü
+
+---
+
+## Genel Çıkarımlar (Güncellenmiş)
+
+| Konu | Öğrenilen Ders |
+|---|---|
+| **Lombok** | Kullanmayacaksan baştan belirt, sonradan kaldırmak maliyetli |
+| **Detay Seviyesi** | Alan isimleri, annotation'lar, HTTP status kodları gibi detaylar prompt'ta verilmeli |
+| **Tek Sorumluluk** | Her prompt tek bir katmanı veya tek bir görevi hedeflemeli |
+| **Bağımsızlık** | Prompt'lar birbirinden bağımsız çalışabilmeli, önceki bağlama güvenmemeli |
+| **Parametriklik** | Entity isimleri değişken tutularak prompt'lar tekrar kullanılabilir hale getirilmeli |
+| **Test Prompt'ları** | Hedef sınıflar, test framework bilgisi ve Spring Boot versiyon uyarıları belirtilmeli |
+| **Spring Boot 4 Farkları** | Import path'leri ve otomatik konfigürasyon farklarını prompt'ta belirtmek zaman kazandırır |
+| **Coverage Hedefi** | Coverage hedefini belirtmek (%100 gibi) agent'ın daha kapsamlı test yazmasını sağlar |
+| **Encoding Sorunları** | Türkçe karakter içeren assertion'larda exact match yerine partial validation kullanılmalı |

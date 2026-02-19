@@ -943,22 +943,24 @@ const productService = {
 
 # 6. CORS AYARLARI
 
-> **Not:** Backend'de şu an CORS konfigürasyonu bulunmamaktadır. Frontend ile entegrasyon için backend'e CORS ayarı eklenmelidir.
+> **Not:** Backend'de CORS konfigürasyonu mevcuttur (`config/CorsConfig.java`). Tüm origin'lere, tüm HTTP metotlarına ve tüm header'lara izin verilmektedir.
 
-**Önerilen CORS konfigürasyonu:**
+**Mevcut CORS konfigürasyonu:**
 
 ```java
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:3000", "http://localhost:5173")
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
+        registry.addMapping("/**")
+                .allowedOrigins("*")
+                .allowedMethods("*")
                 .allowedHeaders("*");
     }
 }
 ```
+
+> **Uyarı:** Canlı ortama geçişte CORS ayarları kısıtlanmalıdır (belirli origin'ler, metotlar ve header'lar tanımlanmalıdır).
 
 ---
 

@@ -19,6 +19,7 @@ com.turkcell.etradebackend10
 ├── business
 │   ├── abstracts            → Service interface'leri
 │   ├── concretes            → Service implementasyonları
+│   ├── exceptions           → Hata yönetimi (GlobalExceptionHandler, BusinessException)
 │   └── rules                → İş kuralları sınıfları
 ├── dataAccess
 │   └── abstracts            → Repository interface'leri (JPA)
@@ -72,8 +73,17 @@ com.turkcell.etradebackend10
 
 ### 2.5 Config Katmanı
 - **Konum:** `config/`
-- **Sorumluluk:** Ortak konfigürasyonlar (ör. CORS, global exception handler)
-- **Örnek:** `CorsConfig`, `GlobalExceptionHandler`
+- **Sorumluluk:** Ortak konfigürasyonlar (ör. CORS)
+- **Örnek:** `CorsConfig`
+
+### 2.6 Exceptions Katmanı
+- **Konum:** `business/exceptions/`
+- **Sorumluluk:** Global hata yönetimi ve exception sınıfları
+- **Sınıflar:**
+  - `GlobalExceptionHandler` — `@RestControllerAdvice` ile tüm hataları yakalar
+  - `BusinessException` — İş kuralı ihlalleri için özel exception
+  - `BusinessErrorResponse` — İş kuralı hata yanıt formatı (`status`, `message`, `timestamp`)
+  - `ValidationErrorResponse` — Validasyon hata yanıt formatı (`status`, `message`, `errors`, `timestamp`)
 
 ---
 
@@ -139,13 +149,63 @@ com.turkcell.etradebackend10
 
 ---
 
-## 10. Genişletilebilirlik ve Test
-- **Yeni Entity Ekleme:** Katmanlı mimari sayesinde kolay
-- **Unit Test:** Service ve business rules katmanında yazılabilir
-- **Integration Test:** Controller ve repository katmanında
+## 10. Test Mimarisi
+
+### 10.1 Test Kapsamı
+Projede **73 unit test** yazılmıştır ve tümü başarıyla geçmektedir.
+
+| Katman | Test Sınıfı | Test Sayısı | Yöntem |
+|--------|------------|-------------|--------|
+| Business Rules | `CategoryBusinessRulesTest` | 6 | Mockito + JUnit |
+| Business Rules | `ProductBusinessRulesTest` | 10 | Mockito + JUnit |
+| Service | `CategoryServiceImplTest` | 11 | Mockito + JUnit |
+| Service | `ProductServiceImplTest` | 17 | Mockito + JUnit |
+| Controller | `CategoriesControllerTest` | 14 | MockMvc + @WebMvcTest |
+| Controller | `ProductsControllerTest` | 15 | MockMvc + @WebMvcTest |
+
+### 10.2 Test Yapısı
+```
+src/test/java/com/turkcell/etradebackend10/
+├── business/
+│   ├── concretes/
+│   │   ├── CategoryServiceImplTest.java
+│   │   └── ProductServiceImplTest.java
+│   └── rules/
+│       ├── CategoryBusinessRulesTest.java
+│       └── ProductBusinessRulesTest.java
+└── api/
+    └── controllers/
+        ├── CategoriesControllerTest.java
+        └── ProductsControllerTest.java
+```
+
+### 10.3 Code Coverage
+- **Araç:** JaCoCo 0.8.12
+- **Business Rules:** %100 coverage
+- **Service Impl:** %100 coverage
+- **Rapor:** `target/site/jacoco/index.html`
+
+### 10.4 Test Teknolojileri
+| Teknoloji | Versiyon | Kullanım Alanı |
+|-----------|---------|----------------|
+| JUnit Jupiter | 6.0.2 | Test framework |
+| Mockito | 5.20.0 | Mocking |
+| MockMvc | Spring Test | API testi |
+| JaCoCo | 0.8.12 | Code coverage |
+
+### 10.5 Spring Boot 4 Test Notları
+- `@WebMvcTest` import: `org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest`
+- `@MockitoBean` import: `org.springframework.test.context.bean.override.mockito.MockitoBean`
+- `ObjectMapper` @WebMvcTest içinde otomatik konfigüre edilmez, manuel oluşturulmalıdır
 
 ---
 
-## 11. Özet
+## 11. Genişletilebilirlik
+- **Yeni Entity Ekleme:** Katmanlı mimari sayesinde kolay
+- **Test Ekleme:** Mevcut test pattern'ı takip edilerek yeni entity testleri yazılabilir
 
-Bu mimari, sürdürülebilir, genişletilebilir ve test edilebilir bir backend uygulaması sağlar. Her katman kendi sorumluluğuna odaklanır, bağımlılıklar net ve Spring IoC ile yönetilir. Hata yönetimi ve validasyon kullanıcıya anlamlı şekilde iletilir.
+---
+
+## 12. Özet
+
+Bu mimari, sürdürülebilir, genişletilebilir ve test edilebilir bir backend uygulaması sağlar. Her katman kendi sorumluluğuna odaklanır, bağımlılıklar net ve Spring IoC ile yönetilir. Hata yönetimi ve validasyon kullanıcıya anlamlı şekilde iletilir. **73 unit test** ile business, service ve controller katmanları %100 test kapsamına sahiptir.

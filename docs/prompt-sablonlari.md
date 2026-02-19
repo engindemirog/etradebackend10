@@ -179,3 +179,77 @@ Oluşturulacak dosyalar:
 7. Service Impl → business/concretes/CategoryServiceImpl.java
 8. Controller → api/controllers/CategoriesController.java
 ```
+
+---
+
+## Prompt 11 — Business Katmanı Unit Test Yazımı (Her entity için tekrarlanır)
+
+```
+{Entity} için business katmanı unit testlerini yaz. Code coverage önemli. JaCoCo coverage raporu üret.
+
+**Test edilecek sınıflar:**
+1. `business/rules/{Entity}BusinessRules` → Tüm iş kuralı metotları (pozitif + negatif senaryolar)
+2. `business/concretes/{Entity}ServiceImpl` → Tüm CRUD metotları (getAll, getById, add, update, delete)
+
+**Test kuralları:**
+- JUnit Jupiter + Mockito kullan
+- @ExtendWith(MockitoExtension.class) ile test sınıflarını yapılandır
+- Repository ve BusinessRules bağımlılıklarını @Mock ile mockla
+- @InjectMocks ile test edilen sınıfı oluştur
+- Her metot için en az bir pozitif ve bir negatif senaryo yaz
+- Coverage %100 hedefle
+```
+
+---
+
+## Prompt 12 — API (Controller) Katmanı Unit Test Yazımı (Her entity için tekrarlanır)
+
+```
+{Entity} için API controller unit testlerini yaz.
+
+**Test edilecek sınıf:**
+- `api/controllers/{Entity}sController` → Tüm endpoint'ler (GET, POST, PUT, DELETE)
+
+**Test kuralları:**
+- @WebMvcTest ile test sınıfını yapılandır
+- MockMvc ile HTTP istekleri simüle et
+- Service bağımlılığını @MockitoBean ile mockla
+- Her endpoint için başarılı senaryo yaz
+- Validasyon hata senaryoları yaz (@Valid ile tetiklenen hatalar)
+- İş kuralı hata senaryoları yaz (BusinessException fırlatan durumlar)
+- HTTP status kodlarını doğrula (200 OK, 201 Created, 400 Bad Request)
+- Response body içeriğini doğrula (jsonPath ile)
+
+**Spring Boot 4 notları:**
+- @WebMvcTest import: org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+- @MockitoBean import: org.springframework.test.context.bean.override.mockito.MockitoBean
+- ObjectMapper manuel oluşturulmalı (auto-configure edilmez)
+```
+
+---
+
+## Prompt 13 — JaCoCo Code Coverage Konfigürasyonu (Tek seferlik)
+
+```
+pom.xml'e JaCoCo Maven plugin'ini ekle:
+- Versiyon: 0.8.12
+- prepare-agent ve report goal'larını tanımla
+- Coverage raporunu target/site/jacoco/ altında üret
+- Business katmanı için filter: com/turkcell/etradebackend10/business/**
+```
+
+---
+
+## Prompt 14 — Global Exception Handler ve Hata Yönetimi (Tek seferlik)
+
+```
+Projeye global hata yönetimi ekle.
+
+**Oluşturulacak dosyalar** (`business/exceptions/`):
+1. BusinessException — RuntimeException'dan miras, Türkçe hata mesajı taşıyan özel exception
+2. BusinessErrorResponse — İş kuralı hata yanıtı (status, message, timestamp)
+3. ValidationErrorResponse — Validasyon hata yanıtı (status, message, errors map, timestamp)
+4. GlobalExceptionHandler — @RestControllerAdvice ile:
+   - BusinessException → 400 Bad Request + BusinessErrorResponse
+   - MethodArgumentNotValidException → 400 Bad Request + ValidationErrorResponse (alan bazlı hatalar)
+```

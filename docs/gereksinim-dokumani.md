@@ -341,17 +341,60 @@ Hangi iş kuralının hangi operasyonda uygulandığını gösteren matris:
 
 ## 7. GEREKSİNİM İZLENEBİLİRLİK MATRİSİ
 
-| Gereksinim | Kaynak Dosya | Test Durumu |
-|------------|-------------|-------------|
-| REQ-CAT-001 | `CategoryServiceImpl.getAll()` | ⬜ Yazılacak |
-| REQ-CAT-002 | `CategoryServiceImpl.getById()` | ⬜ Yazılacak |
-| REQ-CAT-003 | `CategoryServiceImpl.add()` | ⬜ Yazılacak |
-| REQ-CAT-004 | `CategoryServiceImpl.update()` | ⬜ Yazılacak |
-| REQ-CAT-005 | `CategoryServiceImpl.delete()` | ⬜ Yazılacak |
-| REQ-PRD-001 | `ProductServiceImpl.getAll()` | ⬜ Yazılacak |
-| REQ-PRD-002 | `ProductServiceImpl.getById()` | ⬜ Yazılacak |
-| REQ-PRD-003 | `ProductServiceImpl.add()` | ⬜ Yazılacak |
-| REQ-PRD-004 | `ProductServiceImpl.update()` | ⬜ Yazılacak |
-| REQ-PRD-005 | `ProductServiceImpl.delete()` | ⬜ Yazılacak |
-| REQ-ERR-001 | `GlobalExceptionHandler` | ⬜ Yazılacak |
-| REQ-ERR-002 | `GlobalExceptionHandler` | ⬜ Yazılacak |
+| Gereksinim | Kaynak Dosya | Test Dosyası | Test Durumu |
+|------------|-------------|-------------|-------------|
+| REQ-CAT-001 | `CategoryServiceImpl.getAll()` | `CategoryServiceImplTest` | ✅ Yazıldı |
+| REQ-CAT-002 | `CategoryServiceImpl.getById()` | `CategoryServiceImplTest` | ✅ Yazıldı |
+| REQ-CAT-003 | `CategoryServiceImpl.add()` | `CategoryServiceImplTest` | ✅ Yazıldı |
+| REQ-CAT-004 | `CategoryServiceImpl.update()` | `CategoryServiceImplTest` | ✅ Yazıldı |
+| REQ-CAT-005 | `CategoryServiceImpl.delete()` | `CategoryServiceImplTest` | ✅ Yazıldı |
+| REQ-PRD-001 | `ProductServiceImpl.getAll()` | `ProductServiceImplTest` | ✅ Yazıldı |
+| REQ-PRD-002 | `ProductServiceImpl.getById()` | `ProductServiceImplTest` | ✅ Yazıldı |
+| REQ-PRD-003 | `ProductServiceImpl.add()` | `ProductServiceImplTest` | ✅ Yazıldı |
+| REQ-PRD-004 | `ProductServiceImpl.update()` | `ProductServiceImplTest` | ✅ Yazıldı |
+| REQ-PRD-005 | `ProductServiceImpl.delete()` | `ProductServiceImplTest` | ✅ Yazıldı |
+| REQ-ERR-001 | `GlobalExceptionHandler` | `CategoriesControllerTest`, `ProductsControllerTest` | ✅ Yazıldı |
+| REQ-ERR-002 | `GlobalExceptionHandler` | `CategoriesControllerTest`, `ProductsControllerTest` | ✅ Yazıldı |
+| BRL-CAT-001 | `CategoryBusinessRules` | `CategoryBusinessRulesTest` | ✅ Yazıldı |
+| BRL-CAT-002 | `CategoryBusinessRules` | `CategoryBusinessRulesTest` | ✅ Yazıldı |
+| BRL-CAT-003 | `CategoryBusinessRules` | `CategoryBusinessRulesTest` | ✅ Yazıldı |
+| BRL-PRD-001 | `ProductBusinessRules` | `ProductBusinessRulesTest` | ✅ Yazıldı |
+| BRL-PRD-002 | `ProductBusinessRules` | `ProductBusinessRulesTest` | ✅ Yazıldı |
+| BRL-PRD-003 | `ProductBusinessRules` | `ProductBusinessRulesTest` | ✅ Yazıldı |
+| BRL-PRD-004 | `ProductBusinessRules` | `ProductBusinessRulesTest` | ✅ Yazıldı |
+| BRL-PRD-005 | `ProductBusinessRules` | `ProductBusinessRulesTest` | ✅ Yazıldı |
+
+---
+
+## 8. TEST ALTYAPISI
+
+### 8.1 Test Özeti
+
+| Katman | Test Dosyası | Test Sayısı | Durum |
+|--------|-------------|-------------|-------|
+| Business Rules | `CategoryBusinessRulesTest` | 6 | ✅ Geçti |
+| Business Rules | `ProductBusinessRulesTest` | 10 | ✅ Geçti |
+| Service | `CategoryServiceImplTest` | 11 | ✅ Geçti |
+| Service | `ProductServiceImplTest` | 17 | ✅ Geçti |
+| Controller (API) | `CategoriesControllerTest` | 14 | ✅ Geçti |
+| Controller (API) | `ProductsControllerTest` | 15 | ✅ Geçti |
+| **Toplam** | **6 test dosyası** | **73** | **✅ Tümü Geçti** |
+
+### 8.2 Code Coverage (JaCoCo)
+
+| Paket | Instruction Coverage | Branch Coverage |
+|-------|---------------------|----------------|
+| `business.concretes` | 100% | 100% |
+| `business.rules` | 100% | 100% |
+
+**Rapor:** `target/site/jacoco/index.html`
+
+### 8.3 Test Teknolojileri
+
+| Bileşen | Teknoloji |
+|---------|----------|
+| Test Framework | JUnit Jupiter 6.0.2 |
+| Mocking | Mockito 5.20.0 |
+| API Test | MockMvc (`@WebMvcTest`) |
+| Coverage | JaCoCo 0.8.12 |
+| Build | Maven Surefire Plugin |
