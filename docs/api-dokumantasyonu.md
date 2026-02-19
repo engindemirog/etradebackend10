@@ -49,30 +49,98 @@ Format: `YYYY-MM-DDTHH:mm:ss`
 
 ---
 
-## Hata Yanıtları
+## Hata Yönetimi (Global Exception Handler)
 
-### Validation Hataları (400 Bad Request)
-İstek gövdesindeki alanlar validasyon kurallarını sağlamadığında döner.
+Sistem `@RestControllerAdvice` ile global hata yönetimi kullanır. Tüm iş kuralı ve validasyon hataları yapılandırılmış JSON formatında `400 Bad Request` olarak döner.
+
+### İş Kuralı Hataları (400 Bad Request) — `BusinessErrorResponse`
+
+İş kuralı ihlallerinde `BusinessException` fırlatılır ve aşağıdaki formatta yakalanır:
 
 ```json
 {
-  "timestamp": "2026-02-19T14:30:00.000+00:00",
   "status": 400,
-  "error": "Bad Request",
-  "path": "/api/products"
+  "message": "Bu ürün adı zaten mevcut: Laptop",
+  "timestamp": "2026-02-19T14:30:00"
 }
 ```
 
-### İş Kuralı Hataları (500 Internal Server Error)
-İş kuralı ihlallerinde `RuntimeException` fırlatılır.
+**TypeScript Interface:**
+```typescript
+interface BusinessErrorResponse {
+  status: number;
+  message: string;
+  timestamp: string;
+}
+```
+
+### Validasyon Hataları (400 Bad Request) — `ValidationErrorResponse`
+
+Request body'deki alanlar Jakarta Validation kurallarını sağlamadığında döner. Her alan için ayrı hata mesajı içerir.
 
 ```json
 {
-  "timestamp": "2026-02-19T14:30:00.000+00:00",
-  "status": 500,
-  "error": "Internal Server Error",
-  "message": "Bu ürün adı zaten mevcut: Laptop",
-  "path": "/api/products"
+  "status": 400,
+  "message": "Validasyon hatası",
+  "errors": {
+    "name": "Ürün adı boş olamaz.",
+    "unitPrice": "Birim fiyat 0'dan küçük olamaz."
+  },
+  "timestamp": "2026-02-19T14:30:00"
+}
+```
+
+**TypeScript Interface:**
+```typescript
+interface ValidationErrorResponse {
+  status: number;
+  message: string;
+  errors: Record<string, string>;  // { alanAdı: hataMesajı }
+  timestamp: string;
+}
+```
+
+### Frontend'de Hata Yakalama Örneği (Axios)
+
+```typescript
+import axios, { AxiosError } from "axios";
+
+// İş kuralı veya validasyon hatasını ayırt etme
+interface BusinessErrorResponse {
+  status: number;
+  message: string;
+  timestamp: string;
+}
+
+interface ValidationErrorResponse {
+  status: number;
+  message: string;
+  errors: Record<string, string>;
+  timestamp: string;
+}
+
+type ApiErrorResponse = BusinessErrorResponse | ValidationErrorResponse;
+
+function isValidationError(error: ApiErrorResponse): error is ValidationErrorResponse {
+  return "errors" in error;
+}
+
+// Kullanım
+try {
+  await productService.add(request);
+} catch (error) {
+  if (axios.isAxiosError(error)) {
+    const axiosError = error as AxiosError<ApiErrorResponse>;
+    const data = axiosError.response?.data;
+
+    if (data && isValidationError(data)) {
+      // Validasyon hatası — alan bazlı hataları göster
+      console.log(data.errors); // { name: "Ürün adı boş olamaz.", ... }
+    } else if (data) {
+      // İş kuralı hatası — genel mesajı göster
+      console.log(data.message); // "Bu ürün adı zaten mevcut: Laptop"
+    }
+  }
 }
 ```
 
@@ -909,3 +977,5 @@ public class CorsConfig implements WebMvcConfigurer {
 4. **JSON Alanlar Camel Case:** Tüm JSON field isimleri camelCase formatındadır (Java naming convention).
 
 5. **Sayısal ID'ler:** Tüm ID alanları `int` (integer) tipindedir — `0`'dan başlayabilir, auto-increment ile artar.
+
+6. **Global Exception Handling:** Tüm hatalar `@RestControllerAdvice` ile yakalanır. İş kuralı hataları `BusinessException` olarak fırlatılır ve `400 Bad Request` döner. Validasyon hataları `MethodArgumentNotValidException` olarak yakalanır ve alan bazlı hata detayları ile `400 Bad Request` döner.
